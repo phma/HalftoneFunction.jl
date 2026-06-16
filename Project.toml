@@ -1,0 +1,12 @@
+name = "HalftoneFunction"
+uuid = "7e3eba4f-70ae-4152-95ab-2d4f2c2ef44c"
+version = "0.1.0"
+authors = ["Pierre Abbat <phma@bezitopo.org>"]
+
+[deps]
+Integrals = "de52edbc-65ea-441a-8357-d3a637375a31"
+Roots = "f2b01f46-fcfa-551c-844a-d8ac1e96c665"
+
+[compat]
+Integrals = "5.4.1"
+Roots = "3.0.0"
