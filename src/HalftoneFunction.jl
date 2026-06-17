@@ -1,5 +1,5 @@
 module HalftoneFunction
-using Integrals,Roots
+using QuadGK,Roots
 export tryFunc1,areaBelow
 
 # The halftone function h(x) is defined as follows:
