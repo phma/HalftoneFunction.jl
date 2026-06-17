@@ -24,9 +24,10 @@ end
 # |         |       |
 # +-----------------+
 
-
 function areaBelow(h::Function,z::AbstractFloat)
   diagCross=find_zero(x->h(x)-sqrt(z),[0,1])
+  integrand=y->find_zero(x->h(x)-z/y,[diagCross,1])
+  quadgk(integrand,diagCross,1)*2+diagCross^2
 end
 
 end # module HalftoneFunction
