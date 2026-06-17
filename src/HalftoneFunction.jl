@@ -1,6 +1,6 @@
 module HalftoneFunction
 using Integrals,Roots
-export tryFunc1
+export tryFunc1,areaBelow
 
 # The halftone function h(x) is defined as follows:
 # h(x) increases from 0 to 1.
@@ -11,6 +11,10 @@ export tryFunc1
 
 function tryFunc1(x::AbstractFloat)
   (1-(x-1)^2)^(2/3)
+end
+
+function areaBelow(h::Function,z::AbstractFloat)
+  diagCross=find_zero(x->h(x)-sqrt(z),[0,1])
 end
 
 end # module HalftoneFunction
