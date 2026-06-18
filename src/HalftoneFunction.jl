@@ -26,14 +26,14 @@ end
 # +-----------------+
 
 function outegrand(h::Function,z::T,y::T) where T<:AbstractFloat
-  diagCross=find_zero(x->h(x)-sqrt(z),[0,1])
-  diagCross,find_zero(x->h(x)-z/y,[diagCross,1])
+  diagCross=find_zero(x->h(x)-√z,[0,1])
+  diagCross,find_zero(x->h(x)-z/h(y),[0,1])
 end
 
 function areaBelow(h::Function,z::AbstractFloat)
-  diagCross=find_zero(x->h(x)-sqrt(z),[0,1])
-  integrand=y->find_zero(x->h(x)-z/y,[diagCross,1])
-  quadgk(integrand,diagCross,1)*2+diagCross^2
+  diagCross=find_zero(x->h(x)-√z,[0,1])
+  integrand=y->find_zero(x->h(x)-z/h(y),[0,1])
+  quadgk(integrand,diagCross,1)[1]*2+diagCross^2
 end
 
 end # module HalftoneFunction
