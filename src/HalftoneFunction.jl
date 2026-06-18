@@ -1,6 +1,6 @@
 module HalftoneFunction
 using QuadGK,Roots
-export tryFunc1,areaBelow
+export tryFunc1,tryFunc2,areaBelow
 export outegrand
 
 # The halftone function h(x) is defined as follows:
@@ -12,6 +12,10 @@ export outegrand
 
 function tryFunc1(x::AbstractFloat)
   (1-(x-1)^2)^(2/3)
+end
+
+function tryFunc2(x::AbstractFloat)
+  (1-(x-1)^2)^(3/4)
 end
 
 # +-----------------+
