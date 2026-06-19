@@ -1,6 +1,6 @@
 module HalftoneFunction
 using QuadGK,Roots,OffsetArrays
-export tryFunc1,tryFunc2,areaBelow
+export tryFunc1,tryFunc2,areaBelow,HalftoneApprox
 export outegrand
 
 # The halftone function h(x) is defined as follows:
@@ -72,7 +72,7 @@ end
 
 struct HalftoneApprox{T}
   points	::OffsetVector{T}
-  #HalftoneApprox{T}(n::Integer)=new(newPoints(T,n))
+  HalftoneApprox(T::DataType,n::Integer)=new{T}(newPoints(T,n))
 end
 
 end # module HalftoneFunction
