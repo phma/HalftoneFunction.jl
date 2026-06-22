@@ -1,7 +1,7 @@
 module HalftoneFunction
 using QuadGK,Roots,OffsetArrays
 export tryFunc1,tryFunc2,areaBelow,HalftoneApprox,ht
-export outegrand,htError
+export outegrand,htError,adjust!
 
 # The halftone function h(x) is defined as follows:
 # h(x) increases as x goes from 0 to 1.
@@ -92,6 +92,19 @@ function htError(n::Int,hta::HalftoneApprox)
   z=scale(hta.points[n])
   area=areaBelow(x->ht(x,hta),z)
   z-area
+end
+
+function adjust!(hta::HalftoneApprox,n::Int)
+  if n<=0 || n>=lastindex(hta.points)
+    return
+  end
+  lo=invScale(lowerBound(oftype(hta.points[n],n)/lastindex(hta.points)))
+  if n+1==lastindex(hta.points)
+    hi=hta.points[end]
+  else
+    hi=invScale(2*scale(hta.points[n+1])-scale(hta.points[n]))
+  end
+  lo,hi
 end
 
 end # module HalftoneFunction
