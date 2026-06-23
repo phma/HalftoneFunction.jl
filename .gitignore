@@ -28,3 +28,7 @@ LocalPreferences.toml
 
 #File to record debugging.
 debug
+
+# Files containing plots
+*.dat
+*.svg

@@ -1,6 +1,6 @@
 module HalftoneFunction
-using QuadGK,Roots,OffsetArrays,Printf
-export HalftoneApprox,ht,adjust!
+using QuadGK,Roots,OffsetArrays,Printf,CairoMakie
+export HalftoneApprox,ht,adjust!,plotHalftoneFunction
 
 # The halftone function h(x) is defined as follows:
 # h(x) increases as x goes from 0 to 1.
@@ -177,6 +177,17 @@ function adjust!(hta::HalftoneApprox)
     adjust!(hta,n)
     @printf "\r%d " n
   end
+end
+
+function plotHalftoneFunction()
+  hta34=HalftoneApprox(Float64,34)
+  adjust!(hta34)
+  htf=Figure(size=(1189,841))
+  htfax=Axis(htf[1,1])
+  x=(0:34*21)./34/21
+  y=(x->ht(x,hta34)).(x)
+  lines!(htfax,x,y)
+  save("halftone-function.svg",htf)
 end
 
 end # module HalftoneFunction
