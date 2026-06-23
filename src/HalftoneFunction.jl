@@ -73,7 +73,7 @@ end
     struct HalftoneApprox{T}
 
 Holds the points of an approximation to the halftone function. Construct with
-`hta=HalftoneApprox{T}(n)` where `T` is a type such as `Float64` and `n` is
+`hta=HalftoneApprox(T,n)` where `T` is a type such as `Float64` and `n` is
 one more than the number of points.
 
 See also `adjust!`.
@@ -170,6 +170,7 @@ end
     adjust!(hta::HalftoneApprox)
 
 Adjust `hta` so that `ht(x,hta)` is a good approximation to the halftone function.
+Time to adjust increases as the 1.5th power of the number of points.
 """
 function adjust!(hta::HalftoneApprox)
   for n in reverse(eachindex(hta.points))
