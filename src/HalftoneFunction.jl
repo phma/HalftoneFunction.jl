@@ -1,7 +1,6 @@
 module HalftoneFunction
 using QuadGK,Roots,OffsetArrays,Printf
-export tryFunc1,tryFunc2,areaBelow,HalftoneApprox,ht
-export outegrand,htError,adjust!
+export HalftoneApprox,ht,adjust!
 
 # The halftone function h(x) is defined as follows:
 # h(x) increases as x goes from 0 to 1.
@@ -51,11 +50,11 @@ end
 # |         |       |
 # +-----------------+
 
-function outegrand(h::Function,z::T,y::T) where T<:AbstractFloat
-  diagCross=find_zero(x->h(x)-√z,[0,1])
-  diagCross,find_zero(x->h(x)-z/h(y),[0,1])
-end
+"""
+    areaBelow(h::Function,z::AbstractFloat)
 
+Compute the area of the unit square in which `h(x)*h(y)` is below `z`.
+"""
 function areaBelow(h::Function,z::AbstractFloat)
   diagCross=find_zero(x->h(x)-√z,[0,1])
   integrand=y->find_zero(x->h(x)-z/h(y),[0,1])
@@ -70,11 +69,25 @@ function newPoints(T::DataType,n::Integer)
   ret
 end
 
+"""
+    struct HalftoneApprox{T}
+
+Holds the points of an approximation to the halftone function. Construct with
+`hta=HalftoneApprox{T}(n)` where `T` is a type such as `Float64` and `n` is
+one more than the number of points.
+
+See also `adjust!`.
+"""
 struct HalftoneApprox{T}
   points	::OffsetVector{T}
   HalftoneApprox(T::DataType,n::Integer)=new{T}(newPoints(T,n))
 end
 
+"""
+    ht(x::T,hta::HalftoneApprox{T})
+
+Compute the halftone function at `x` in [0,1], using `hta`.
+"""
 function ht(x::T,hta::HalftoneApprox{T}) where T<:AbstractFloat
   if x<0 || x>1
     throw(DomainError(x,"The argument to ht must be between 0 and 1 inclusive."))
@@ -88,12 +101,27 @@ function ht(x::T,hta::HalftoneApprox{T}) where T<:AbstractFloat
   end
 end
 
+"""
+    htError(n::Int,hta::HalftoneApprox)
+
+Compute the error in the `n`th point in `hta`. Except for the next-to-last
+point, this is not the error in the point's elevation, but the difference
+between the elevation and the area below that elevation. For the next-to-last
+point, the area is independent of the elevation and is simply the area outside
+the upper right quarter circle.
+"""
 function htError(n::Int,hta::HalftoneApprox)
   z=scale(hta.points[n])
   area=areaBelow(x->ht(x,hta),z)
   z-area
 end
 
+"""
+    adjust!(hta::HalftoneApprox,n::Int)
+
+Adjust the `n`th point of `hta` so that its `htError` is zero. All points after
+the `n`th must already be adjusted.
+"""
 function adjust!(hta::HalftoneApprox,n::Int)
   if n<=0 || n>=lastindex(hta.points)
     return
@@ -138,6 +166,11 @@ function adjust!(hta::HalftoneApprox,n::Int)
   end
 end
 
+"""
+    adjust!(hta::HalftoneApprox)
+
+Adjust `hta` so that `ht(x,hta)` is a good approximation to the halftone function.
+"""
 function adjust!(hta::HalftoneApprox)
   for n in reverse(eachindex(hta.points))
     adjust!(hta,n)
