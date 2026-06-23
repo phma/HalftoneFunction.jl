@@ -104,7 +104,6 @@ function adjust!(hta::HalftoneApprox,n::Int)
   else
     hi=invScale(2*scale(hta.points[n+1])-scale(hta.points[n+2]))
   end
-  keep=hta.points[n]
   hta.points[n]=lo
   loval=htError(n,hta)
   hta.points[n]=hi
@@ -112,13 +111,12 @@ function adjust!(hta::HalftoneApprox,n::Int)
   mid=lo # arbitrary
   midval=loval
   sgn=sign(hival-loval)
-  hta.points[n]=keep
   while midval!=0 && hi-lo>eps(hta.points[end])
     @assert hival*loval<=0
     mid=lo-loval*(hi-lo)/(hival-loval) # secant rule
     hta.points[n]=mid
     midval=htError(n,hta)
-    @printf "sec: %20.17f %20.17f %20.17f\n" lo mid hi
+    #@printf "sec: %20.17f %20.17f %20.17f\n" lo mid hi
     if sgn*midval>0
       hi=mid
       hival=midval
@@ -129,7 +127,7 @@ function adjust!(hta::HalftoneApprox,n::Int)
     mid=(lo+hi)/2 # midpoint rule
     hta.points[n]=mid
     midval=htError(n,hta)
-    @printf "mid: %20.17f %20.17f %20.17f\n" lo mid hi
+    #@printf "mid: %20.17f %20.17f %20.17f\n" lo mid hi
     if sgn*midval>0
       hi=mid
       hival=midval
@@ -138,8 +136,13 @@ function adjust!(hta::HalftoneApprox,n::Int)
       loval=midval
     end
   end
-  @printf "Old points[%d]=%f\n" n keep
-  @printf "New points[%d]=%f\n" n hta.points[n]
+end
+
+function adjust!(hta::HalftoneApprox)
+  for n in reverse(eachindex(hta.points))
+    adjust!(hta,n)
+    @printf "\r%d " n
+  end
 end
 
 end # module HalftoneFunction
