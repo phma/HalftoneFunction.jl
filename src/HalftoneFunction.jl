@@ -100,11 +100,17 @@ function adjust!(hta::HalftoneApprox,n::Int)
   end
   lo=invScale(lowerBound(oftype(hta.points[n],n)/lastindex(hta.points)))
   if n+1==lastindex(hta.points)
-    hi=hta.points[end]
+    hi=(hta.points[end]+hta.points[n])/2
   else
     hi=invScale(2*scale(hta.points[n+1])-scale(hta.points[n]))
   end
-  lo,hi
+  keep=hta.points[n]
+  hta.points[n]=lo
+  loval=htError(n,hta)
+  hta.points[n]=hi
+  hival=htError(n,hta)
+  hta.points[n]=keep
+  loval,hival
 end
 
 end # module HalftoneFunction
