@@ -1,5 +1,5 @@
 module HalftoneFunction
-using QuadGK,Roots,OffsetArrays
+using QuadGK,Roots,OffsetArrays,Printf
 export tryFunc1,tryFunc2,areaBelow,HalftoneApprox,ht
 export outegrand,htError,adjust!
 
@@ -109,6 +109,8 @@ function adjust!(hta::HalftoneApprox,n::Int)
   loval=htError(n,hta)
   hta.points[n]=hi
   hival=htError(n,hta)
+  mid=lo # arbitrary
+  midval=loval
   hta.points[n]=keep
   loval,hival
 end
