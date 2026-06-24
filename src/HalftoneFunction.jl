@@ -1,6 +1,7 @@
 module HalftoneFunction
 using QuadGK,Roots,OffsetArrays,Printf,CairoMakie
 export HalftoneApprox,ht,adjust!,plotHalftoneFunction
+export marshal,unmarshal
 
 # The halftone function h(x) is defined as follows:
 # h(x) increases as x goes from 0 to 1.
@@ -177,6 +178,38 @@ function adjust!(hta::HalftoneApprox)
     adjust!(hta,n)
     @printf "\r%d " n
   end
+end
+
+"""
+    marshal(p::AbstractFloat)
+
+Convert `p` to a sequence of bytes, which can be converted back to `p` given
+its type. `p` must be in [0,1).
+"""
+function marshal(p::AbstractFloat)
+  ret=[0x00,0x00]
+  while p>0
+    p*=256
+    push!(ret,floor(UInt8,p))
+    p=modf(p)[1]
+  end
+  ret[2]=(length(ret)-2)%256
+  ret[1]=(length(ret)-2)÷256
+  ret
+end
+
+"""
+    unmarshal(T::DataType,bytes::Vector{UInt8})
+
+Convert `bytes` to a floating-point number of type `T`. `bytes` has had the two
+length bytes stripped off when read from a file.
+"""
+function unmarshal(T::DataType,bytes::Vector{UInt8})
+  ret=zero(T)
+  for b in reverse(bytes)
+    ret=(b+ret)/256
+  end
+  ret
 end
 
 function plotHalftoneFunction()
