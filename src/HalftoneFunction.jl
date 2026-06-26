@@ -212,6 +212,26 @@ function unmarshal(T::DataType,bytes::Vector{UInt8})
   ret
 end
 
+function typeName(T::DataType)
+  ret=string(T)
+  if findlast('.',ret)==nothing
+    ret="Base."*ret
+  end
+  ret
+end
+
+function nameType(name::String)
+  pos=findlast('.',name)
+  mod=name[1:pos-1]
+  tname=name[pos+1:end]
+  if mod=="Base"
+    mod=Base
+  elseif mod=="Core"
+    mod=Core
+  end
+  getfield(mod,Symbol(tname))
+end
+
 function plotHalftoneFunction()
   hta34=HalftoneApprox(Float64,34)
   adjust!(hta34)
