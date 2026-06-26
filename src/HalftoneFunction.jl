@@ -65,7 +65,7 @@ end
 function newPoints(T::DataType,n::Integer)
   ret=OffsetVector(T[],-1)
   for i in 0:n
-    push!(ret,invScale(lowerBound(T(i)/n)))
+    push!(ret,invScale(lowerBound((T(i)/n)^2)))
   end
   ret
 end
@@ -93,11 +93,11 @@ function ht(x::T,hta::HalftoneApprox{T}) where T<:AbstractFloat
   if x<0 || x>1
     throw(DomainError(x,"The argument to ht must be between 0 and 1 inclusive."))
   end
-  pos=floor(Int,x*lastindex(hta.points))
+  pos=floor(Int,√(x*lastindex(hta.points)^2))
   if pos==lastindex(hta.points)
     return scale(hta.points[pos])
   else
-    along=x*lastindex(hta.points)-pos
+    along=(x*lastindex(hta.points)^2-pos^2)/(2*pos+1)
     return scale(hta.points[pos]+along*(hta.points[pos+1]-hta.points[pos]))
   end
 end
@@ -127,11 +127,11 @@ function adjust!(hta::HalftoneApprox,n::Int)
   if n<=0 || n>=lastindex(hta.points)
     return
   end
-  lo=invScale(lowerBound(oftype(hta.points[n],n)/lastindex(hta.points)))
+  lo=invScale(lowerBound(oftype(hta.points[n],n)^2/lastindex(hta.points)^2))
   if n+1==lastindex(hta.points)
     hi=(hta.points[end]+hta.points[n])/2
   else
-    hi=invScale(2*scale(hta.points[n+1])-scale(hta.points[n+2]))
+    hi=invScale((4*(n+1)*scale(hta.points[n+1])-(2n+1)*scale(hta.points[n+2]))/(2n+3))
   end
   hta.points[n]=lo
   loval=htError(n,hta)
