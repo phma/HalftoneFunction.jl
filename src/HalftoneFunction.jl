@@ -1,7 +1,7 @@
 module HalftoneFunction
 using QuadGK,Roots,OffsetArrays,Printf,CairoMakie
 export HalftoneApprox,ht,adjust!,plotHalftoneFunction
-export marshal,unmarshal
+export marshal,unmarshal,readHeader,writeHeader
 
 # The halftone function h(x) is defined as follows:
 # h(x) increases as x goes from 0 to 1.
@@ -17,6 +17,8 @@ end
 function tryFunc2(x::AbstractFloat)
   (1-(x-1)^2)^(3/4)
 end
+
+const SCALE_ID=0x0001
 
 function scale(x::AbstractFloat)
   (1-(x-1)^2)^(3/4)
@@ -230,6 +232,27 @@ function nameType(name::String)
     mod=Core
   end
   getfield(mod,Symbol(tname))
+end
+
+function writeHeader(f::IO)
+  write(f,marshal(√π/2))
+  # magic number expressing how fast halftone circles grow compared to squares
+  write(f,hton(SCALE_ID))
+end
+
+function readFloat(f::IO,T::DataType)
+  lenBytes=read(f,2)
+  len=lenBytes[1]*256+lenBytes[2]
+  unmarshal(T,read(f,len))
+end
+
+function readHeader(f::IO)
+  magic=readFloat(f,Float64)
+  if magic==√π/2
+    ntoh(read(f,UInt16))
+  else
+    throw(ErrorException("invalid header"))
+  end
 end
 
 function plotHalftoneFunction()
