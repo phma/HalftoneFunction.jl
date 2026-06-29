@@ -1,6 +1,7 @@
 module HalftoneFunction
 using QuadGK,Roots,OffsetArrays,Printf,CairoMakie
 export HalftoneApprox,ht,adjust!,plotHalftoneFunction
+export writeHalftone,writeHalftones
 export marshal,unmarshal,readHeader,writeHeader
 
 # The halftone function h(x) is defined as follows:
@@ -253,6 +254,30 @@ function readHeader(f::IO)
   else
     throw(ErrorException("invalid header"))
   end
+end
+
+function writeHalftone(f::IO,hta::HalftoneApprox)
+  write(f,typeName(eltype(hta.points)))
+  write(f,0x00)
+  write(f,hton(UInt32(lastindex(hta.points))))
+  for i in eachindex(hta.points)
+    if i>0 && i<lastindex(hta.points) # these points are 0 and 1, no need to write them
+      write(f,marshal(hta.points[i]))
+    end
+  end
+end
+
+function writeHalftones(f::IO,hta::Vector{<:HalftoneApprox})
+  for h in hta
+    writeHalftone(f,h)
+  end
+end
+
+function writeHalftones(filename::String,hta::Vector{<:HalftoneApprox})
+  f=open(filename,"w")
+  writeHeader(f)
+  writeHalftones(f,hta)
+  close(f)
 end
 
 function plotHalftoneFunction()

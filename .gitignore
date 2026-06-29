@@ -32,3 +32,6 @@ debug
 # Files containing plots
 *.dat
 *.svg
+
+# Files containing HalftoneApprox
+*.hta
