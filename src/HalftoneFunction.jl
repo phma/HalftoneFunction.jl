@@ -1,7 +1,7 @@
 module HalftoneFunction
 using QuadGK,Roots,OffsetArrays,Printf,CairoMakie
 export HalftoneApprox,ht,adjust!,plotHalftoneFunction
-export writeHalftone,writeHalftones,readHalftone,readHalftones
+export writeHalftone,writeHalftones,readHalftone,readHalftones,findHta
 export marshal,unmarshal,readHeader,writeHeader
 
 # The halftone function h(x) is defined as follows:
@@ -86,6 +86,8 @@ struct HalftoneApprox{T}
   points	::OffsetVector{T}
   HalftoneApprox(T::DataType,n::Integer)=new{T}(newPoints(T,n))
 end
+
+const htaList=Dict{Tuple{DataType,Int},HalftoneApprox}()
 
 """
     ht(x::T,hta::HalftoneApprox{T})
@@ -180,6 +182,17 @@ function adjust!(hta::HalftoneApprox)
   for n in reverse(eachindex(hta.points))
     adjust!(hta,n)
     @printf "\r%d " n
+  end
+end
+
+function findHta(T::DataType,n::Integer)
+  if haskey(htaList,(T,n))
+    htaList[(T,n)]
+  else
+    hta=HalftoneApprox(T,n)
+    adjust!(hta)
+    htaList[(T,n)]=hta
+    hta
   end
 end
 
