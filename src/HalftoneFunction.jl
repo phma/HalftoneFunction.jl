@@ -1,7 +1,7 @@
 module HalftoneFunction
 using QuadGK,Roots,OffsetArrays,Printf,CairoMakie
 export HalftoneApprox,ht,adjust!,plotHalftoneFunction
-export writeHalftone,writeHalftones
+export writeHalftone,writeHalftones,readHalftone,readHalftones
 export marshal,unmarshal,readHeader,writeHeader
 
 # The halftone function h(x) is defined as follows:
@@ -243,10 +243,24 @@ end
 
 function readFloat(f::IO,T::DataType)
   lenBytes=read(f,2)
-  len=lenBytes[1]*256+lenBytes[2]
-  unmarshal(T,read(f,len))
+  if length(lenBytes)==2
+    len=lenBytes[1]*256+lenBytes[2]
+  else
+    len=0
+  end
+  fpBytes=read(f,len)
+  if length(lenBytes)<2 || length(fpBytes)<len
+    error("end of file reading floating point number")
+  end
+  unmarshal(T,fpBytes)
 end
 
+"""
+    readHeader(f::IO)
+
+Read the header of a halftone function file, returning the number identifying the scale
+function used when it was written.
+"""
 function readHeader(f::IO)
   magic=readFloat(f,Float64)
   if magic==√π/2
@@ -267,10 +281,42 @@ function writeHalftone(f::IO,hta::HalftoneApprox)
   end
 end
 
+function readHalftone(f::IO)
+  if eof(f)
+    return nothing
+  end
+  typestr=String(readuntil(f,0x00))
+  T=nameType(typestr)
+  if !(T<:AbstractFloat)
+    throw(ErrorException("invalid type"))
+  end
+  len=ntoh(read(f,UInt32))
+  ret=HalftoneApprox(T,len)
+  for i in 1:len-1
+    ret.points[i]=readFloat(f,T)
+    if ret.points[i]<ret.points[i-1]
+      throw(ErrorException("points out of order"))
+    end
+  end
+  ret
+end
+
 function writeHalftones(f::IO,hta::Vector{<:HalftoneApprox})
   for h in hta
     writeHalftone(f,h)
   end
+end
+
+function readHalftones(f::IO)
+  ret=HalftoneApprox[]
+  while true
+    ht=readHalftone(f)
+    if ht==nothing
+      break
+    end
+    push!(ret,ht)
+  end
+  ret
 end
 
 function writeHalftones(filename::String,hta::Vector{<:HalftoneApprox})
@@ -278,6 +324,20 @@ function writeHalftones(filename::String,hta::Vector{<:HalftoneApprox})
   writeHeader(f)
   writeHalftones(f,hta)
   close(f)
+end
+
+function readHalftones(filename::String)
+  f=open(filename,"r")
+  try
+    scaleId=readHeader(f)
+    ret=readHalftones(f)
+    # TODO rescale them if scaleId!=SCALE_ID
+    return ret
+  catch
+    rethrow()
+  finally
+    close(f)
+  end
 end
 
 function plotHalftoneFunction()
