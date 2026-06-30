@@ -361,6 +361,7 @@ function plotHalftoneFunction()
   y=(x->ht(x,hta34)).(x)
   lines!(htfax,x,y)
   save("halftone-function.svg",htf)
+  save("halftone-function.pdf",htf)
 end
 
 end # module HalftoneFunction
