@@ -354,8 +354,7 @@ function readHalftones(filename::String)
 end
 
 function plotHalftoneFunction()
-  hta34=HalftoneApprox(Float64,34)
-  adjust!(hta34)
+  hta34=findHta(Float64,34)
   htf=Figure(size=(1189,841))
   htfax=Axis(htf[1,1])
   x=(0:34*21)./34/21
